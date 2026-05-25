@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mainRouter from './routes/index'; 
@@ -14,13 +14,13 @@ app.use(cors({ origin: true, credentials: true }) as any);
 app.use(express.json() as any);
 
 // Debug logging middleware to trace 404 issues
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 });
 
 // Health check endpoint to verify server status
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
     (res as any).status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -33,7 +33,7 @@ app.use('/api', mainRouter);
 app.use('/', mainRouter);
 
 // 404 Handler for unhandled routes - Helps debugging by returning JSON instead of HTML
-app.use((req, res) => {
+app.use((req: Request, res: Response) => {
     console.warn(`[404] Route not found: ${req.method} ${req.url}`);
     (res as any).status(404).json({ 
         error: 'Not Found', 
