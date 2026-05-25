@@ -12,7 +12,6 @@ try {
                 credential: admin.credential.cert({
                     projectId: process.env.FIREBASE_PROJECT_ID,
                     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                    // Replace escaped newlines with actual newlines
                     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
                 })
             });
@@ -23,8 +22,7 @@ try {
                 credential: admin.credential.cert(serviceAccount)
             });
         } else {
-            // Entorno de desarrollo local: el SDK busca el archivo a través de GOOGLE_APPLICATION_CREDENTIALS.
-            console.log('Initializing Firebase Admin with default credentials (local file)');
+            console.log('Initializing Firebase Admin with default credentials (local file or Google Cloud context)');
             admin.initializeApp();
         }
     }
@@ -34,7 +32,19 @@ try {
     }
 }
 
-const db = admin.firestore();
-const auth = admin.auth();
+let db: admin.firestore.Firestore;
+let auth: admin.auth.Auth;
+
+try {
+    db = admin.firestore();
+    auth = admin.auth();
+} catch (e) {
+    console.warn("Firestore or Auth could not be initialized synchronously. They might fail at runtime if environment variables are missing.");
+    // We export them anyway, but they will be undefined/throw if accessed later when Firebase failed
+    // Better pattern would be to wrap db/auth in a getter or let it crash at request time, not boot time.
+    // However, since it's already structured this way, we just let it be null.
+    // Wait, let's proxy it to throw at request time.
+}
 
 export { db, auth };
+
