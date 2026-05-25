@@ -51,4 +51,4 @@ if (!process.env.VERCEL) {
 }
 
 // Critical for Vercel: Export the app as default so the serverless function can capture requests
-export default app;
+module.exports = app;
